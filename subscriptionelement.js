@@ -1,42 +1,82 @@
-document.addEventListener("DOMContentLoaded", function() {
-        const applyTranslations = (data, lang) => {
-            document.getElementById('subscriptionTitle').textContent = data[lang].subscriptionTitle;
 
-document.getElementById('addToCartButton').textContent = data[lang].addToCartButton;
-            document.getElementById('option1').textContent = data[lang].subscriptionOptions[0];
-            document.getElementById('option2').textContent = data[lang].subscriptionOptions[1];
-            document.getElementById('option3').textContent = data[lang].subscriptionOptions[2];
-            document.getElementById('option4').textContent = data[lang].subscriptionOptions[3];
-        };
+document.addEventListener("DOMContentLoaded", function () {
+    const applyTranslations = (data, lang) => {
+        try {
+            const subscriptionTitle = document.getElementById('subscriptionTitle');
+            const addToCartButton = document.getElementById('addToCartButton');
 
-        const fetchAndStoreTranslations = () => {
-            return fetch('https://raw.githubusercontent.com/bazaarteech/subscriptionplans/main/subscriptionplans.json')
-                .then(response => response.json())
-                .then(data => {
-                    localStorage.setItem('translations', JSON.stringify(data));
-                    return data;
-                });
-        };
-
-        const getUserLang = (userCountry) => {
-            if (['MA', 'SA', 'AE', 'DZ', 'TN', 'KW', 'QA', 'OM', 'BH', 'EG', 'IQ', 'SY', 'JO', 'LB', 'PS', 'LY', 'SD', 'DJ', 'SO',  'SS'].includes(userCountry)) {
-                return 'ar'; 
-            } else if (['CR', 'MX', 'AR', 'CL', 'CO', 'PE', 'VE', 'GT', 'EC', 'BO', 'PY', 'UY', 'CU', 'DO', 'SV', 'NI', 'HN', 'PR', 'GQ', 'PA', 'ES'].includes(userCountry)) {
-                return 'es'; 
-            } else if (['US', 'GB', 'CA', 'AU', 'IE', 'NZ', 'ZA', 'IN', 'NG', 'PK', 'PH', 'SG', 'JM', 'MT', 'BB', 'TT', 'GH', 'ZM', 'US-KE', 'US-AZ', 'US-FL', 'US-GA', 'US-HI', 'US-KY', 'US-NV', 'US-NJ', 'US-NY', 'US-TX', 'US-VA', 'US-WA', 'US-AK', 'US-LA', 'BS', 'BZ', 'GD', 'HN', 'KN', 'LC', 'VC', 'SL', 'MW', 'ZW', 'KE', 'UG', 'SS', 'MU', 'MV', 'FJ', 'MM', 'NP', 'KR', 'JP', 'IL', 'HK', 'ET', 'ER', 'CY', 'BN', 'AO', 'BD', 'VU', 'TZ', 'LK', 'SC', 'WS', 'LC', 'KN', 'RW', 'DK', 'NO', 'RU', 'TR', 'IT', 'DE', 'NL', 'TH', 'BY', 'HR', 'AT', 'BG', 'RO', 'FI', 'IS', 'KZ', 'DM', 'GY', 'VG', 'TV'].includes(userCountry)) {
-                return 'en'; 
-            } else if (['FR', 'CD', 'BE', 'CH', 'LU', 'CI', 'SN', 'CM', 'GN', 'BF', 'NE', 'TD', 'CF', 'RW', 'NC', 'CK', 'BJ', 'BI', 'KM', 'CG', 'ML', 'SC'].includes(userCountry)) {
-                return 'fr'; 
-            } else {
-                return 'ar'; 
+            if (subscriptionTitle) {
+                subscriptionTitle.textContent = data[lang]?.subscriptionTitle || "Default Title";
             }
+            if (addToCartButton) {
+                addToCartButton.textContent = data[lang]?.addToCartButton || "Add to Cart";
+            }
+        } catch (error) {
+            console.error("Error applying translations:", error);
+        }
+    };
+
+    const fetchAndStoreTranslations = async () => {
+        try {
+            const response = await fetch('https://raw.githubusercontent.com/bazaarteech/subscriptionplans/main/subscriptionplans.json');
+            const data = await response.json();
+            localStorage.setItem('translations', JSON.stringify({
+                data: data,
+                timestamp: Date.now()  // Store timestamp to check freshness
+            }));
+            return data;
+        } catch (error) {
+            console.error("Error fetching translations:", error);
+            throw error;
+        }
+    };
+
+    const getUserLang = (userCountry) => {
+        const langMapping = {
+            ar: ['MA', 'SA', 'AE', 'DZ', 'TN', 'KW', 'QA', 'OM', 'BH', 'EG', 'IQ', 'SY', 'JO', 'LB', 'PS', 'LY', 'SD', 'DJ', 'SO', 'SS'],
+            es: ['CR', 'MX', 'AR', 'CL', 'CO', 'PE', 'VE', 'GT', 'EC', 'BO', 'PY', 'UY', 'CU', 'DO', 'SV', 'NI', 'HN', 'PR', 'GQ', 'PA', 'ES'],
+            en: ['US', 'GB', 'CA', 'AU', 'IE', 'NZ', 'ZA', 'IN', 'NG', 'PK', 'PH', 'SG', 'JM', 'MT', 'BB', 'TT', 'GH', 'ZM', 'BS', 'BZ', 'GD', 'HN', 'KN', 'LC', 'VC', 'SL', 'MW', 'ZW', 'KE', 'UG', 'SS', 'MU', 'MV', 'FJ', 'MM', 'NP', 'KR', 'JP', 'IL', 'HK', 'ET', 'ER', 'CY', 'BN', 'AO', 'BD', 'VU', 'TZ', 'LK', 'SC', 'WS', 'RW', 'DK', 'NO', 'RU', 'TR', 'IT', 'DE', 'NL', 'TH', 'BY', 'HR', 'AT', 'BG', 'RO', 'FI', 'IS', 'KZ', 'DM', 'GY', 'VG', 'TV'],
+            fr: ['FR', 'CD', 'BE', 'CH', 'LU', 'CI', 'SN', 'CM', 'GN', 'BF', 'NE', 'TD', 'CF', 'RW', 'NC', 'CK', 'BJ', 'BI', 'KM', 'CG', 'ML', 'SC']
         };
 
-        const storedTranslations = localStorage.getItem('translations');
+        for (const [lang, countries] of Object.entries(langMapping)) {
+            if (countries.includes(userCountry)) {
+                return lang;
+            }
+        }
+        return 'ar'; // Default to Arabic
+    };
 
-        (storedTranslations ? Promise.resolve(JSON.parse(storedTranslations)) : fetchAndStoreTranslations())
-            .then(data => fetch('https://ipinfo.io/json?token=7026faa1150bfd'))
-            .then(response => response.json())
-            .then(ipData => applyTranslations(JSON.parse(localStorage.getItem('translations')), getUserLang(ipData.country)))
-            .catch(error => console.error('Error:', error));
-    });
+    const initTranslations = async () => {
+        const loader = document.getElementById('loader'); // Assuming there's a loader element in the HTML
+        if (loader) loader.style.display = 'block'; // Show loading indicator
+
+        try {
+            const storedTranslations = localStorage.getItem('translations');
+            const currentTime = Date.now();
+
+            // Check if the stored translations are fresh (e.g., older than 24 hours)
+            const translations = storedTranslations
+                ? JSON.parse(storedTranslations)
+                : await fetchAndStoreTranslations();
+
+            if (translations.timestamp && currentTime - translations.timestamp > 86400000) { // 24 hours
+                console.log('Translations are outdated. Fetching new data.');
+                return await fetchAndStoreTranslations();
+            }
+
+            const ipResponse = await fetch('https://ipinfo.io/json?token=7026faa1150bfd');
+            const ipData = await ipResponse.json();
+            const userLang = getUserLang(ipData.country);
+
+            applyTranslations(translations.data, userLang);
+        } catch (error) {
+            console.error("Initialization error:", error);
+        } finally {
+            if (loader) loader.style.display = 'none'; // Hide loading indicator
+        }
+    };
+
+    initTranslations();
+});
+              
